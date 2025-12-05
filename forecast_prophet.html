@@ -220,7 +220,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <li><p>Seasonal components (yearly, weekly, daily)</p></li>
 </ul>
 <p>These visualizations provide a quick overview of how crime patterns evolve over time and how Prophet captures long-term trends and seasonality.</p>
-<div id="e835d474" class="cell" data-execution_count="1">
+<div id="3d07af11" class="cell" data-execution_count="1">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># ============================================================</span></span>
@@ -289,7 +289,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="daily-crime-comparison-la-vs-sd-vs-sf" class="level1">
 <h1>Daily Crime Comparison — LA vs SD vs SF</h1>
-<div id="b2023ba2" class="cell" data-execution_count="2">
+<div id="62397bc6" class="cell" data-execution_count="2">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># ============================================================</span></span>
@@ -319,7 +319,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 <section id="forecast-los-angeles-crime-prophet" class="level2">
 <h2 class="anchored" data-anchor-id="forecast-los-angeles-crime-prophet">Forecast — Los Angeles Crime (Prophet)</h2>
-<div id="78846e2e" class="cell" data-execution_count="3">
+<div id="c15adc4c" class="cell" data-execution_count="3">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># ============================================================</span></span>
@@ -344,8 +344,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a>forecast_la[[<span class="st">"ds"</span>, <span class="st">"yhat"</span>, <span class="st">"yhat_lower"</span>, <span class="st">"yhat_upper"</span>]].tail()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stderr">
-<pre><code>19:55:04 - cmdstanpy - INFO - Chain [1] start processing
-19:55:04 - cmdstanpy - INFO - Chain [1] done processing</code></pre>
+<pre><code>20:03:38 - cmdstanpy - INFO - Chain [1] start processing
+20:03:38 - cmdstanpy - INFO - Chain [1] done processing</code></pre>
 </div>
 <div class="cell-output cell-output-display" data-execution_count="3">
 <div>
@@ -366,36 +366,36 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td data-quarto-table-cell-role="th">1904</td>
 <td>2025-06-24</td>
 <td>-171.178043</td>
-<td>-289.656149</td>
-<td>-60.197380</td>
+<td>-298.507800</td>
+<td>-52.305591</td>
 </tr>
 <tr class="even">
 <td data-quarto-table-cell-role="th">1905</td>
 <td>2025-06-25</td>
 <td>-158.073769</td>
-<td>-279.714439</td>
-<td>-41.493277</td>
+<td>-283.141153</td>
+<td>-31.999930</td>
 </tr>
 <tr class="odd">
 <td data-quarto-table-cell-role="th">1906</td>
 <td>2025-06-26</td>
 <td>-161.695290</td>
-<td>-276.771163</td>
-<td>-44.625232</td>
+<td>-284.488422</td>
+<td>-47.771424</td>
 </tr>
 <tr class="even">
 <td data-quarto-table-cell-role="th">1907</td>
 <td>2025-06-27</td>
 <td>-119.476412</td>
-<td>-235.847348</td>
-<td>5.231574</td>
+<td>-237.478556</td>
+<td>-3.525584</td>
 </tr>
 <tr class="odd">
 <td data-quarto-table-cell-role="th">1908</td>
 <td>2025-06-28</td>
 <td>-141.978940</td>
-<td>-254.183927</td>
-<td>-24.401385</td>
+<td>-260.261629</td>
+<td>-20.961267</td>
 </tr>
 </tbody>
 </table>
@@ -406,7 +406,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="forecast-san-francisco-crime-prophet" class="level2">
 <h2 class="anchored" data-anchor-id="forecast-san-francisco-crime-prophet">Forecast — San Francisco Crime (Prophet)</h2>
-<div id="67c35600" class="cell" data-execution_count="4">
+<div id="a15bd0c1" class="cell" data-execution_count="4">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co"># ============================================================</span></span>
@@ -431,8 +431,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a>forecast_sf[[<span class="st">"ds"</span>, <span class="st">"yhat"</span>, <span class="st">"yhat_lower"</span>, <span class="st">"yhat_upper"</span>]].tail()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stderr">
-<pre><code>19:55:04 - cmdstanpy - INFO - Chain [1] start processing
-19:55:04 - cmdstanpy - INFO - Chain [1] done processing</code></pre>
+<pre><code>20:03:38 - cmdstanpy - INFO - Chain [1] start processing
+20:03:38 - cmdstanpy - INFO - Chain [1] done processing</code></pre>
 </div>
 <div class="cell-output cell-output-display" data-execution_count="4">
 <div>
@@ -453,36 +453,36 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td data-quarto-table-cell-role="th">2174</td>
 <td>2025-12-14</td>
 <td>185.450937</td>
-<td>122.521009</td>
-<td>247.942671</td>
+<td>124.018624</td>
+<td>245.883128</td>
 </tr>
 <tr class="even">
 <td data-quarto-table-cell-role="th">2175</td>
 <td>2025-12-15</td>
 <td>206.020712</td>
-<td>144.413803</td>
-<td>272.224510</td>
+<td>139.401471</td>
+<td>265.412519</td>
 </tr>
 <tr class="odd">
 <td data-quarto-table-cell-role="th">2176</td>
 <td>2025-12-16</td>
 <td>208.902863</td>
-<td>146.886118</td>
-<td>267.340141</td>
+<td>150.248029</td>
+<td>269.494452</td>
 </tr>
 <tr class="even">
 <td data-quarto-table-cell-role="th">2177</td>
 <td>2025-12-17</td>
 <td>226.950089</td>
-<td>167.019058</td>
-<td>288.173018</td>
+<td>161.540439</td>
+<td>288.863800</td>
 </tr>
 <tr class="odd">
 <td data-quarto-table-cell-role="th">2178</td>
 <td>2025-12-18</td>
 <td>213.829829</td>
-<td>150.656820</td>
-<td>274.638697</td>
+<td>152.781602</td>
+<td>273.436506</td>
 </tr>
 </tbody>
 </table>
@@ -493,7 +493,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="forecast-san-diego-crime-prophet-normal-mode" class="level2">
 <h2 class="anchored" data-anchor-id="forecast-san-diego-crime-prophet-normal-mode">Forecast — San Diego Crime (Prophet, Normal Mode)</h2>
-<div id="55703459" class="cell" data-execution_count="5">
+<div id="4392e95b" class="cell" data-execution_count="5">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co"># ============================================================</span></span>
@@ -518,8 +518,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb7-20"><a href="#cb7-20" aria-hidden="true" tabindex="-1"></a>forecast_sd[[<span class="st">"ds"</span>, <span class="st">"yhat"</span>, <span class="st">"yhat_lower"</span>, <span class="st">"yhat_upper"</span>]].tail()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stderr">
-<pre><code>19:55:04 - cmdstanpy - INFO - Chain [1] start processing
-19:55:05 - cmdstanpy - INFO - Chain [1] done processing</code></pre>
+<pre><code>20:03:39 - cmdstanpy - INFO - Chain [1] start processing
+20:03:39 - cmdstanpy - INFO - Chain [1] done processing</code></pre>
 </div>
 <div class="cell-output cell-output-display" data-execution_count="5">
 <div>
@@ -540,36 +540,36 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td data-quarto-table-cell-role="th">1809</td>
 <td>2025-12-15</td>
 <td>243.013641</td>
-<td>185.028695</td>
-<td>308.854255</td>
+<td>184.635046</td>
+<td>307.568841</td>
 </tr>
 <tr class="even">
 <td data-quarto-table-cell-role="th">1810</td>
 <td>2025-12-16</td>
 <td>237.511433</td>
-<td>180.497373</td>
-<td>296.830626</td>
+<td>177.339111</td>
+<td>300.897422</td>
 </tr>
 <tr class="odd">
 <td data-quarto-table-cell-role="th">1811</td>
 <td>2025-12-17</td>
 <td>246.504209</td>
-<td>191.699762</td>
-<td>303.370271</td>
+<td>188.854847</td>
+<td>309.691746</td>
 </tr>
 <tr class="even">
 <td data-quarto-table-cell-role="th">1812</td>
 <td>2025-12-18</td>
 <td>248.197095</td>
-<td>184.911920</td>
-<td>306.230911</td>
+<td>190.700293</td>
+<td>307.043569</td>
 </tr>
 <tr class="odd">
 <td data-quarto-table-cell-role="th">1813</td>
 <td>2025-12-19</td>
 <td>273.766830</td>
-<td>214.228195</td>
-<td>334.400356</td>
+<td>214.532920</td>
+<td>333.862205</td>
 </tr>
 </tbody>
 </table>
@@ -580,7 +580,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="save-forecast-results-as-csv-for-all-3-cities" class="level2">
 <h2 class="anchored" data-anchor-id="save-forecast-results-as-csv-for-all-3-cities">Save Forecast Results as CSV for All 3 Cities</h2>
-<div id="fe4e1132" class="cell" data-execution_count="6">
+<div id="79dadc9e" class="cell" data-execution_count="6">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="co"># ============================================================</span></span>
@@ -621,36 +621,36 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td data-quarto-table-cell-role="th">1904</td>
 <td>2025-06-24</td>
 <td>-171.178043</td>
-<td>-289.656149</td>
-<td>-60.197380</td>
+<td>-298.507800</td>
+<td>-52.305591</td>
 </tr>
 <tr class="even">
 <td data-quarto-table-cell-role="th">1905</td>
 <td>2025-06-25</td>
 <td>-158.073769</td>
-<td>-279.714439</td>
-<td>-41.493277</td>
+<td>-283.141153</td>
+<td>-31.999930</td>
 </tr>
 <tr class="odd">
 <td data-quarto-table-cell-role="th">1906</td>
 <td>2025-06-26</td>
 <td>-161.695290</td>
-<td>-276.771163</td>
-<td>-44.625232</td>
+<td>-284.488422</td>
+<td>-47.771424</td>
 </tr>
 <tr class="even">
 <td data-quarto-table-cell-role="th">1907</td>
 <td>2025-06-27</td>
 <td>-119.476412</td>
-<td>-235.847348</td>
-<td>5.231574</td>
+<td>-237.478556</td>
+<td>-3.525584</td>
 </tr>
 <tr class="odd">
 <td data-quarto-table-cell-role="th">1908</td>
 <td>2025-06-28</td>
 <td>-141.978940</td>
-<td>-254.183927</td>
-<td>-24.401385</td>
+<td>-260.261629</td>
+<td>-20.961267</td>
 </tr>
 </tbody>
 </table>
@@ -662,7 +662,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="forecast-comparison-la-vs-sd-vs-sf" class="level1">
 <h1>Forecast Comparison — LA vs SD vs SF</h1>
-<div id="18812334" class="cell" data-execution_count="7">
+<div id="292a6d0e" class="cell" data-execution_count="7">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="co"># ============================================================</span></span>
@@ -693,7 +693,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="actual-vs-forecast-los-angeles-san-diego-san-francisco" class="level1">
 <h1>Actual vs Forecast — Los Angeles / San Diego / San Francisco</h1>
-<div id="e3cfa7a4" class="cell" data-execution_count="8">
+<div id="514a3cc6" class="cell" data-execution_count="8">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="co"># ============================================================</span></span>
@@ -765,7 +765,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="forecast-with-confidence-interval-yhat_lower-yhat_upper" class="level1">
 <h1>Forecast with Confidence Interval (yhat_lower, yhat_upper)</h1>
-<div id="35c107b6" class="cell" data-execution_count="9">
+<div id="507fa572" class="cell" data-execution_count="9">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="co"># ============================================================</span></span>
@@ -832,7 +832,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="prophet-seasonal-components-trend-weekly-yearly" class="level1">
 <h1>Prophet Seasonal Components (Trend / Weekly / Yearly)</h1>
-<div id="64262290" class="cell" data-execution_count="10">
+<div id="8796975d" class="cell" data-execution_count="10">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="co"># ============================================================</span></span>
@@ -846,7 +846,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 <section id="los-angeles" class="level2">
 <h2 class="anchored" data-anchor-id="los-angeles">Los Angeles</h2>
-<div id="eb1770a0" class="cell" data-execution_count="11">
+<div id="4b2de0b3" class="cell" data-execution_count="11">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="co"># LA</span></span>
@@ -863,7 +863,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="san-diego" class="level2">
 <h2 class="anchored" data-anchor-id="san-diego">San Diego</h2>
-<div id="d77b2b01" class="cell" data-execution_count="12">
+<div id="f1e52532" class="cell" data-execution_count="12">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="co"># SD</span></span>
@@ -880,7 +880,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="san-francisco" class="level2">
 <h2 class="anchored" data-anchor-id="san-francisco">San Francisco</h2>
-<div id="40f9a970" class="cell" data-execution_count="13">
+<div id="bddaef6c" class="cell" data-execution_count="13">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="co"># SF</span></span>
