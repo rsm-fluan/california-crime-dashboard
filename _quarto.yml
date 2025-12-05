@@ -13,8 +13,8 @@ website:
         href: la.qmd
       - text: San Francisco
         href: sf.qmd
-      - text: Forecast
-        href: forecast_all.ipynb
+      - text: Forecast - Prophet
+        href: forecast_prophet.qmd
       - text: Linear Regression
         href: linear_regression.qmd
 
