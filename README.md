@@ -1,3 +1,10 @@
+![Python](https://img.shields.io/badge/Python-3.10+-blue?style=for-the-badge&logo=python&logoColor=white)
+![Quarto](https://img.shields.io/badge/Quarto-Interactive%20Dashboard-6A5ACD?style=for-the-badge&logo=quarto&logoColor=white)
+![Plotly](https://img.shields.io/badge/Plotly-Interactive%20Charts-3F4F75?style=for-the-badge&logo=plotly&logoColor=white)
+![Prophet](https://img.shields.io/badge/Prophet-Time%20Series%20Forecasting-8A2BE2?style=for-the-badge)
+![GitHub Pages](https://img.shields.io/badge/Deployed%20With-GitHub%20Pages-222222?style=for-the-badge&logo=githubpages&logoColor=white)
+
+
 # 🚨 California Crime Dashboard
 
 > An interactive data visualization dashboard analyzing crime patterns across San Diego, Los Angeles, and San Francisco (2021-2025)
