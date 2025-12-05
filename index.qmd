@@ -1,17 +1,17 @@
 ---
-title: "Overview"
+title: "California Crime Dashboard Overview"
 format: html
 ---
 
 
-## About This Dashboard
+### 📌About This Dashboard
 
 This interactive dashboard provides a comprehensive analysis of crime patterns across three major California cities: **San Diego**, **Los Angeles**, and **San Francisco**.
 The visualizations highlight monthly crime trends, top crime categories, geographic hotspots, and demographic characteristics of victims.
 
 By combining multiple data sources and interactive analytics, this dashboard allows users to explore similarities and differences across cities, understand long-term crime behavior, and support data-driven decision making for policy planning, public safety, and resource allocation.
 
-## MGTA 452 Project Slide
+### 💡MGTA 452 Project Slide
 
 <div style="position: relative; width: 100%; height: 0; padding-top: 56.2500%;
  padding-bottom: 0; box-shadow: 0 2px 8px 0 rgba(63,69,81,0.16); margin-top: 1.6em; margin-bottom: 0.9em; overflow: hidden;
@@ -22,146 +22,8 @@ By combining multiple data sources and interactive analytics, this dashboard all
 </div>
 
 
+### 🗺️ Geographic Distribution of Crime Incidents
 
-## Data Schema
-
-All cities in the California Crime Dashboard are cleaned into a common schema.
-Each row represents a single reported incident.
-
-<table>
-  <thead>
-    <tr>
-      <th>Column</th>
-      <th>Type</th>
-      <th>Description</th>
-    </tr>
-  </thead>
-
-  <tbody>
-    <tr>
-      <td><code>incident_id</code></td>
-      <td>String</td>
-      <td>Unique identifier for each crime incident.</td>
-    </tr>
-
-    <tr>
-      <td><code>incident_date</code></td>
-      <td>Date</td>
-      <td>Calendar date when the incident occurred (YYYY-MM-DD).</td>
-    </tr>
-
-    <tr>
-      <td><code>incident_time</code></td>
-      <td>Time</td>
-      <td>Time of day when the incident occurred (HH:MM:SS).</td>
-    </tr>
-
-    <tr>
-      <td><code>year</code></td>
-      <td>Integer</td>
-      <td>Year of the incident (e.g., 2020–2025).</td>
-    </tr>
-
-    <tr>
-      <td><code>month</code></td>
-      <td>Integer</td>
-      <td>Month of the incident (1–12).</td>
-    </tr>
-
-    <tr>
-      <td><code>day_of_week</code></td>
-      <td>String</td>
-      <td>Day of week when the incident occurred (e.g., Monday, Tuesday).</td>
-    </tr>
-
-    <tr>
-      <td><code>hour</code></td>
-      <td>Integer</td>
-      <td>Hour of day (0–23).</td>
-    </tr>
-
-    <tr>
-      <td><code>time_bin</code></td>
-      <td>String</td>
-      <td>Binned time of day (Late Night, Morning, Afternoon, Evening).</td>
-    </tr>
-
-    <tr>
-      <td><code>season</code></td>
-      <td>String</td>
-      <td>Season of year (Winter, Spring, Summer, Fall).</td>
-    </tr>
-
-    <tr>
-      <td><code>crime_code</code></td>
-      <td>String / Integer</td>
-      <td>Original crime code from the city open-data portal.</td>
-    </tr>
-
-    <tr>
-      <td><code>crime_description</code></td>
-      <td>String</td>
-      <td>Description of the offense (e.g., “BURGLARY FROM VEHICLE”).</td>
-    </tr>
-
-    <tr>
-      <td><code>crime_category</code></td>
-      <td>String</td>
-      <td>Standardized crime grouping (Property Crime, Violent Crime, etc.).</td>
-    </tr>
-
-    <tr>
-      <td><code>area_name</code></td>
-      <td>String</td>
-      <td>Neighborhood / police division for the incident.</td>
-    </tr>
-
-    <tr>
-      <td><code>zip_code</code></td>
-      <td>String</td>
-      <td>ZIP code of the incident location.</td>
-    </tr>
-
-    <tr>
-      <td><code>latitude</code></td>
-      <td>Numeric</td>
-      <td>Latitude coordinate (may be rounded or masked).</td>
-    </tr>
-
-    <tr>
-      <td><code>longitude</code></td>
-      <td>Numeric</td>
-      <td>Longitude coordinate (may be rounded or masked).</td>
-    </tr>
-
-    <tr>
-      <td><code>report_status</code></td>
-      <td>String</td>
-      <td>Status of the report (Open, Closed, Cleared, etc.).</td>
-    </tr>
-
-    <tr>
-      <td><code>victim_age</code></td>
-      <td>Integer</td>
-      <td>Victim age (if reported).</td>
-    </tr>
-
-    <tr>
-      <td><code>victim_sex</code></td>
-      <td>String</td>
-      <td>Victim gender (M, F, X, Unknown).</td>
-    </tr>
-
-    <tr>
-      <td><code>victim_descent</code></td>
-      <td>String</td>
-      <td>Race/ethnicity code from the agency.</td>
-    </tr>
-  </tbody>
-</table>
-
-
-## Geographic Distribution of Crime Incidents
 ```{python}
 import pandas as pd
 import plotly.graph_objects as go
@@ -171,19 +33,26 @@ import plotly.graph_objects as go
 # ============================
 dataframes = []
 
-df_sd = pd.read_csv("data/san_diego_with_latlon.csv")
-df_sd["city"] = "San Diego"
-dataframes.append(df_sd)
+try:
+    df_sd = pd.read_csv("data/san_diego_with_latlon.csv", low_memory=False)
+    df_sd["city"] = "San Diego"
+    dataframes.append(df_sd)
+except Exception as e:
+    pass
 
-df_la = pd.read_csv("data/los_angeles.csv")
-df_la["city"] = "Los Angeles"
-dataframes.append(df_la)
+try:
+    df_la = pd.read_csv("data/los_angeles.csv", low_memory=False)
+    df_la["city"] = "Los Angeles"
+    dataframes.append(df_la)
+except Exception as e:
+    pass
 
-
-df_sf = pd.read_csv("data/san_francisco.csv")
-df_sf["city"] = "San Francisco"
-dataframes.append(df_sf)
-
+try:
+    df_sf = pd.read_csv("data/san_francisco.csv", low_memory=False)
+    df_sf["city"] = "San Francisco"
+    dataframes.append(df_sf)
+except Exception as e:
+    pass
 
 df = pd.concat(dataframes, ignore_index=True)
 
@@ -197,7 +66,6 @@ df_map = df_map[
     (df_map['latitude'].between(32, 38)) &
     (df_map['longitude'].between(-125, -114))
 ]
-
 
 # Aggregate by rounding coordinates to create grid cells
 # This dramatically reduces the number of points
@@ -234,7 +102,7 @@ for city in cities:
     else:  # San Francisco
         colorscale = [[0, 'rgba(241,143,1,0.2)'], [0.5, 'rgba(241,143,1,0.6)'], [1, 'rgba(241,143,1,1)']]
 
-    fig.add_trace(go.Scattermapbox(
+    fig.add_trace(go.Scattermap(
         lat=city_data['lat_rounded'],
         lon=city_data['lon_rounded'],
         mode='markers',
@@ -285,8 +153,8 @@ for i, city in enumerate(cities):
             args=[
                 {"visible": vis},
                 {
-                    "mapbox.center": {"lat": center['lat'], "lon": center['lon']},
-                    "mapbox.zoom": 10,
+                    "map.center": {"lat": center['lat'], "lon": center['lon']},
+                    "map.zoom": 9.5,
                     "title": {
                         "text": f"<b>Regional Crime Heat Map — {city}</b><br><sub>{center['total']:,} incidents across {len(grid_counts[grid_counts['city'] == city]):,} areas</sub>"
                     }
@@ -324,10 +192,10 @@ fig.update_layout(
         "xanchor": "center",
         "font": {"size": 20}
     },
-    mapbox=dict(
-        style="carto-positron",
+    map=dict(
+        style="open-street-map",
         center={"lat": first_center['lat'], "lon": first_center['lon']},
-        zoom=10
+        zoom=9.5
     ),
     margin=dict(t=100, b=20, l=20, r=20),
     height=700,
@@ -339,10 +207,13 @@ fig.show()
 ```
 
 
-## Monthly Crime Trends — California Cities
+### 🔹 Monthly Crime Trends
 ```{python}
 import pandas as pd
 import plotly.graph_objects as go
+import warnings
+warnings.filterwarnings("ignore")
+
 
 # ============================
 # Load data
@@ -367,7 +238,6 @@ def clean_city(df, city_name):
     # For rows that failed, try alternative formats
     if df["incident_date"].isna().any():
         mask = df["incident_date"].isna()
-        print(f"  {city_name}: Trying alternative date formats for {mask.sum():,} rows...")
 
         for date_format in ["%Y-%m-%d", "%m/%d/%Y %I:%M:%S %p", "%Y-%m-%d %H:%M:%S", "%m/%d/%Y"]:
             if mask.sum() > 0:
@@ -405,8 +275,6 @@ df_all = pd.concat([df_sd, df_la, df_sf], ignore_index=True)
 
 # Remove rows with invalid dates
 df_all = df_all[df_all["year"].notna()].copy()
-
-print(f"\nTotal valid records: {len(df_all):,}")
 
 # Monthly crime counts
 monthly_all = (
@@ -552,13 +420,16 @@ fig.update_yaxes(
 fig.show()
 ```
 
-## Crime Comparison — Weekday
+
+### 🔹 Crime Comparison — Weekday
 
 ```{python}
 
 import pandas as pd
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
+import warnings
+warnings.filterwarnings("ignore")
 
 # ============================
 # Load data
@@ -775,7 +646,7 @@ fig.update_yaxes(showgrid=True, gridwidth=1, gridcolor='rgba(128, 128, 128, 0.2)
 fig.show()
 ```
 
-## Crime Comparison — Season
+### 🔹 Crime Comparison — Season
 ```{python}
 import pandas as pd
 import plotly.graph_objects as go
@@ -1001,7 +872,7 @@ fig.show()
 
 
 
-## Top 5 Crimes Comparison — San Diego vs Los Angeles vs San Francisco
+### 🔹 Crimes Comparison — Top 5 Categories
 
 ```{python}
 import pandas as pd

@@ -7,6 +7,10 @@ website:
     left:
       - text: Overview
         href: index.qmd
+      - text: About
+        menu:
+          - href: data_schema.qmd
+            text: Data Schema
       - text: San Diego
         href: sd.qmd
       - text: Los Angeles
