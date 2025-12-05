@@ -1,27 +1,31 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://rsm-fluan.github.io/california-crime-dashboard/forecast_prophet.html</loc>
-    <lastmod>2025-12-05T03:52:51.798Z</lastmod>
+    <loc>https://rsm-fluan.github.io/california-crime-dashboard/data_schema.html</loc>
+    <lastmod>2025-12-05T05:14:57.246Z</lastmod>
   </url>
   <url>
-    <loc>https://rsm-fluan.github.io/california-crime-dashboard/la.html</loc>
-    <lastmod>2025-12-05T03:11:52.861Z</lastmod>
-  </url>
-  <url>
-    <loc>https://rsm-fluan.github.io/california-crime-dashboard/sf.html</loc>
-    <lastmod>2025-12-05T03:11:52.865Z</lastmod>
-  </url>
-  <url>
-    <loc>https://rsm-fluan.github.io/california-crime-dashboard/sd.html</loc>
-    <lastmod>2025-12-05T03:11:52.864Z</lastmod>
+    <loc>https://rsm-fluan.github.io/california-crime-dashboard/index.html</loc>
+    <lastmod>2025-12-05T05:37:14.274Z</lastmod>
   </url>
   <url>
     <loc>https://rsm-fluan.github.io/california-crime-dashboard/linear_regression.html</loc>
     <lastmod>2025-12-05T03:29:43.876Z</lastmod>
   </url>
   <url>
-    <loc>https://rsm-fluan.github.io/california-crime-dashboard/index.html</loc>
-    <lastmod>2025-12-05T04:31:36.301Z</lastmod>
+    <loc>https://rsm-fluan.github.io/california-crime-dashboard/sd.html</loc>
+    <lastmod>2025-12-05T03:11:52.864Z</lastmod>
+  </url>
+  <url>
+    <loc>https://rsm-fluan.github.io/california-crime-dashboard/sf.html</loc>
+    <lastmod>2025-12-05T03:11:52.865Z</lastmod>
+  </url>
+  <url>
+    <loc>https://rsm-fluan.github.io/california-crime-dashboard/la.html</loc>
+    <lastmod>2025-12-05T03:11:52.861Z</lastmod>
+  </url>
+  <url>
+    <loc>https://rsm-fluan.github.io/california-crime-dashboard/forecast_prophet.html</loc>
+    <lastmod>2025-12-05T03:52:51.798Z</lastmod>
   </url>
 </urlset>
