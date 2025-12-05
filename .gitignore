@@ -1,6 +1,23 @@
 # CSV is too large to upload
+
+
+# Quarto build directories
+_site/
+_freeze/
+.quarto/
+/.quarto/
+
+# Python
+__pycache__/
+.ipynb_checkpoints/
+
+# Data files
+*.csv
+*.parquet
 data/*.csv
 data/*.parquet
 data/
 
-/.quarto/
+# Other big files
+*.zip
+*.tar.gz
