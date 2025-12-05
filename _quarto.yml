@@ -15,8 +15,8 @@ website:
         href: sf.qmd
       - text: Forecast
         href: forecast_all.ipynb
-      - text: LinearRegression
-        href: LinearRegression.qmd
+      - text: Linear Regression
+        href: linear_regression.qmd
 
 
 format:
