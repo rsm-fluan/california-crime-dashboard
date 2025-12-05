@@ -7,21 +7,35 @@ website:
     left:
       - text: Overview
         href: index.qmd
+      - text: Cities
+        menu:
+          - text: San Diego
+            href: sd.qmd
+          - text: Los Angeles
+            href: la.qmd
+          - text: San Francisco
+            href: sf.qm
+      - text: Prediction
+        menu:
+        - text: Forecast - Prophet
+          href: forecast_prophet.qmd
+        - text: Linear Regression
+          href: linear_regression.qmd
       - text: About
         menu:
           - href: data_schema.qmd
             text: Data Schema
-      - text: San Diego
-        href: sd.qmd
-      - text: Los Angeles
-        href: la.qmd
-      - text: San Francisco
-        href: sf.qmd
-      - text: Forecast - Prophet
-        href: forecast_prophet.qmd
-      - text: Linear Regression
-        href: linear_regression.qmd
+    right:
+      - icon: github
+        href: https://github.com/rsm-fluan/california-crime-dashboard
 
+  page-footer:
+    left: "© 2025 California Crime Dashboard"
+    right:
+      - text: "Data Sources"
+        href: data_schema.qmd
+      - text: "GitHub"
+        href: https://github.com/rsm-fluan/california-crime-dashboard
 
 format:
   html:
