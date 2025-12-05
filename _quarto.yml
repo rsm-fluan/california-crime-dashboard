@@ -26,6 +26,3 @@ format:
     code-fold: true
     code-tools: false
     code-link: false
-
-execute:
-  freeze: auto
