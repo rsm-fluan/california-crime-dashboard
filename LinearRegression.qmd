@@ -1,0 +1,103 @@
+---
+title: "Multi-City Crime Forecast - LinearRegression"
+format: html
+jupyter: python3
+---
+
+```{python}
+import pandas as pd
+import numpy as np
+from sklearn.linear_model import LinearRegression
+from sklearn.metrics import r2_score
+import plotly.express as px
+
+SF_forecast = pd.read_csv("data/San Francisco_forecast.csv")
+LA_forecast = pd.read_csv("data/Los Angeles_forecast.csv")
+SD_forecast = pd.read_csv("data/San Diego_forecast.csv")
+
+combined = pd.concat([SF_forecast, LA_forecast, SD_forecast])
+combined["ds"] = pd.to_datetime(combined["ds"])
+
+fig = px.line(
+    combined,
+    x="ds",
+    y="yhat",
+    color="city",
+    markers=True,
+    title="Crime Forecast Comparison Across Cities (Next 12 Months)"
+)
+
+fig.update_layout(
+    xaxis_title="Month",
+    yaxis_title="Predicted Crime Count",
+    legend_title="City"
+)
+
+```
+
+```{python}
+cities = {
+    "San Francisco": "data/SF_monthly.csv",
+    "Los Angeles": "data/LA_monthly.csv",
+    "San Diego": "data/SD_monthly.csv"
+}
+
+results = []
+
+for city, path in cities.items():
+    df = pd.read_csv(path)
+    df["ds"] = pd.to_datetime(df["ds"])
+    y = df["y"].values
+    X = np.arange(len(y)).reshape(-1, 1)
+    model = LinearRegression()
+    model.fit(X, y)
+    y_pred = model.predict(X)
+    r2 = r2_score(y, y_pred)
+    results.append([city, r2])
+
+r2_df = pd.DataFrame(results, columns=["City", "R_squared"])
+r2_df
+
+r2_df.style.format({"R_squared": "{:.3f}"})
+```
+
+```{python}
+import pandas as pd
+import numpy as np
+from sklearn.linear_model import LinearRegression
+from sklearn.metrics import r2_score
+import plotly.express as px
+
+cities = {
+    "San Francisco": "data/SF_monthly.csv",
+    "Los Angeles": "data/LA_monthly.csv",
+    "San Diego": "data/SD_monthly.csv"
+}
+
+results = []
+
+for city, path in cities.items():
+    df = pd.read_csv(path)
+    df["ds"] = pd.to_datetime(df["ds"])
+    y = df["y"].values
+    X = np.arange(len(y)).reshape(-1, 1)
+    model = LinearRegression()
+    model.fit(X, y)
+    y_pred = model.predict(X)
+    r2 = r2_score(y, y_pred)
+    results.append([city, r2])
+
+r2_df = pd.DataFrame(results, columns=["City", "R_squared"])
+
+fig = px.bar(
+    r2_df,
+    x="City",
+    y="R_squared",
+    title="R² Comparison Across Cities",
+    text="R_squared",
+    color="City"
+)
+
+fig.update_layout(yaxis_title="R² Value")
+fig
+```

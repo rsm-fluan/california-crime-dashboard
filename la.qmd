@@ -1,0 +1,370 @@
+---
+title: "Los Angeles Crime Dashboard"
+format: html
+---
+
+## Summary
+
+This page analyzes crime patterns in Los Angeles by looking at trends over time, the most common crime types, crime hotspots by ZIP code, and victim age characteristics.
+These visualizations help identify when crimes peak, which offenses are most frequent, and how different groups of victims are affected.
+
+
+
+## LA Crime Map (Basic Marker Map)
+
+```{python}
+import folium
+from folium.plugins import MarkerCluster
+import pandas as pd
+
+df = pd.read_csv("data/los_angeles.csv")
+
+la_map = folium.Map(location=[34.0522, -118.2437], zoom_start=10)
+marker_cluster = MarkerCluster().add_to(la_map)
+
+df_sample = df.sample(n=5000, random_state=42)
+
+for _, row in df_sample.iterrows():
+    folium.CircleMarker(
+        location=[row["latitude"], row["longitude"]],
+        radius=3,
+        color="red",
+        fill=True,
+        fill_opacity=0.6
+    ).add_to(marker_cluster)
+
+la_map
+```
+
+
+
+## Prepare Data
+
+```{python}
+import pandas as pd
+
+df = pd.read_csv("data/los_angeles.csv")
+
+df["incident_date"] = pd.to_datetime(df["incident_date"], errors="coerce")
+df["year"] = df["incident_date"].dt.year
+df["month"] = df["incident_date"].dt.month
+df["month_name"] = df["incident_date"].dt.strftime("%b")
+
+df = df.dropna(subset=["year", "month"])
+
+monthly_total = (
+    df.groupby(["year", "month", "month_name"])
+    .size()
+    .reset_index(name="crime_count")
+)
+```
+
+
+# Crime Trends Over Time
+
+```{python}
+import plotly.express as px
+
+years = sorted(df["year"].unique())
+
+fig = px.line(
+    monthly_total,
+    x="month_name",
+    y="crime_count",
+    color="year",
+    markers=True,
+    title="Monthly Crime Totals (Select Year)",
+    template="plotly_white"
+)
+
+buttons = []
+
+buttons.append(
+    dict(
+        label="All Years",
+        method="update",
+        args=[{"visible": [True] * len(years)}]
+    )
+)
+
+for i, yr in enumerate(years):
+    visibility = [False] * len(years)
+    visibility[i] = True
+
+    buttons.append(
+        dict(
+            label=str(yr),
+            method="update",
+            args=[{"visible": visibility}]
+        )
+    )
+
+fig.update_layout(
+    updatemenus=[
+        dict(
+            buttons=buttons,
+            direction="down",
+            x=1.15,
+            y=1.0
+        )
+    ]
+)
+
+fig.update_xaxes(
+    categoryorder="array",
+    categoryarray=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"]
+)
+
+fig
+```
+
+
+## Top Crime Types Over Time (Top 5)
+
+```{python}
+monthly_by_cat = (
+    df.groupby(["year", "month", "month_name", "crime_description"])
+    .size()
+    .reset_index(name="crime_count")
+)
+
+top_categories = df["crime_description"].value_counts().head(5).index
+monthly_by_cat = monthly_by_cat[monthly_by_cat["crime_description"].isin(top_categories)]
+```
+
+```{python}
+import plotly.express as px
+import plotly.graph_objects as go
+
+# --- Step 1: Keep only top 5 categories ---
+top_categories = (
+    df["crime_description"]
+      .value_counts()
+      .head(5)
+      .index
+)
+
+filtered = monthly_by_cat[
+    monthly_by_cat["crime_description"].isin(top_categories)
+].copy()
+
+# --- Step 2: available years ---
+years = sorted(filtered["year"].unique())
+default_year = years[0]
+
+# --- Step 3: filter initial dataset ---
+df_year = filtered[filtered["year"] == default_year]
+
+# --- Step 4: build initial plot ---
+fig = px.line(
+    df_year,
+    x="month_name",
+    y="crime_count",
+    color="crime_description",
+    markers=True,
+    title=f"Monthly Crime Trends by Category ({default_year})",
+    template="plotly_white"
+)
+
+# --- Step 5: Year Dropdown ---
+year_buttons = []
+
+for yr in years:
+    df_temp = filtered[filtered["year"] == yr]
+
+    # Build x/y arrays for each category in correct order
+    x_list = [
+        df_temp[df_temp["crime_description"] == cat]["month_name"]
+        for cat in top_categories
+    ]
+    y_list = [
+        df_temp[df_temp["crime_description"] == cat]["crime_count"]
+        for cat in top_categories
+    ]
+
+    year_buttons.append(
+        dict(
+            label=str(yr),
+            method="update",
+            args=[
+                {
+                    "x": x_list,
+                    "y": y_list,
+                },
+                {
+                    "title": f"Monthly Crime Trends by Category ({yr})"
+                }
+            ]
+        )
+    )
+
+fig.update_layout(
+    updatemenus=[
+        dict(
+            buttons=year_buttons,
+            direction="down",
+            x=1.15,
+            y=1.05,
+            showactive=True
+        )
+    ]
+)
+
+# --- Step 6: Month Ordering ---
+fig.update_xaxes(
+    categoryorder="array",
+    categoryarray=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"]
+)
+
+fig
+```
+
+# Neighborhood Analysis
+```{python}
+import plotly.express as px
+import pandas as pd
+
+df = pd.read_csv("data/los_angeles.csv")
+
+top_neighborhoods = df["area_name"].value_counts().head(10)
+
+fig = px.bar(
+    x=top_neighborhoods.index,
+    y=top_neighborhoods.values,
+    labels={"x": "Neighborhood", "y": "Incidents"},
+    title="Top 10 Neighborhoods by Number of Crimes – Los Angeles",
+    text=top_neighborhoods.values
+)
+
+fig.update_traces(marker_color="tomato", textposition="outside")
+fig.update_layout(
+    xaxis_tickangle=35,
+    template="simple_white",
+    height=500
+)
+
+fig.show()
+
+```
+
+## Crime Hotspots — Top ZIP Codes
+
+```{python}
+df["zip_code"] = df["zip_code"].astype(str).str.replace(".0", "", regex=False)
+
+zip_counts = (
+    df.groupby("zip_code")
+      .size()
+      .reset_index(name="crime_count")
+      .sort_values("crime_count", ascending=False)
+)
+
+top_zip = zip_counts.head(10)
+
+import plotly.express as px
+
+fig = px.bar(
+    top_zip.sort_values("crime_count"),
+    x="crime_count",
+    y="zip_code",
+    orientation="h",
+    title="Top 10 ZIP Codes by Total Crime",
+    labels={"zip_code": "ZIP Code", "crime_count": "Total Crimes"},
+    template="plotly_white"
+)
+
+fig
+```
+
+## Victim Age Distribution
+
+```{python}
+import plotly.express as px
+
+# 1. Clean age data
+df_age_clean = df[(df["victim_age"] >= 0) & (df["victim_age"] <= 120)]
+
+# 2. Select TOP 5 crime categories
+top5_age = (
+    df_age_clean["crime_description"]
+      .value_counts()
+      .head(5)
+      .index
+)
+
+df_top5 = df_age_clean[df_age_clean["crime_description"].isin(top5_age)]
+
+# 3. Build a clean histogram
+fig = px.histogram(
+    df_top5,
+    x="victim_age",
+    color="crime_description",
+    nbins=40,
+    barmode="overlay",
+    opacity=0.6,
+    title="Victim Age Distribution (Top 5 Crime Categories)",
+    template="plotly_white"
+)
+
+fig.update_layout(
+    legend_title_text="Crime Category",
+    bargap=0.05
+)
+
+fig
+```
+
+
+## Victim Age Groups
+
+```{python}
+import pandas as pd
+import plotly.express as px
+
+# --- Clean age data ---
+df_age_clean = df[(df["victim_age"] >= 0) & (df["victim_age"] <= 120)].copy()
+
+df_age_clean.loc[:, "age_group"] = pd.cut(
+    df_age_clean["victim_age"],
+    bins=[0, 18, 30, 45, 60, 120],
+    labels=["0–18", "19–30", "31–45", "46–60", "60+"]
+)
+
+# --- Step 1: Select Top 10 crimes by total count ---
+top10_crimes = (
+    df_age_clean["crime_description"]
+      .value_counts()
+      .head(10)
+      .index
+)
+
+df_top10 = df_age_clean[df_age_clean["crime_description"].isin(top10_crimes)]
+
+# --- Step 2: Group for plotting ---
+age_group_df = (
+    df_top10
+        .dropna(subset=["age_group"])
+        .groupby(["crime_description", "age_group"], observed=True)
+        .size()
+        .reset_index(name="count")
+)
+
+# --- Step 3: Plot ---
+fig = px.bar(
+    age_group_df,
+    x="crime_description",
+    y="count",
+    color="age_group",
+    barmode="stack",
+    title="Victim Age Groups (Top 10 Crimes)",
+    template="plotly_white"
+)
+
+# Make x labels readable
+fig.update_layout(
+    xaxis_tickangle=-45,
+    legend_title_text="Age Group"
+)
+
+fig
+```

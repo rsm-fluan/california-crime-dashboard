@@ -1,0 +1,280 @@
+---
+title: "San Francisco Crime Dashboard"
+format: html
+---
+
+
+```{python}
+
+import pandas as pd
+import folium
+from folium.plugins import MarkerCluster
+import warnings
+warnings.filterwarnings("ignore", category=pd.errors.DtypeWarning)
+
+df = pd.read_csv("data/san_francisco.csv",low_memory=False)
+
+# remove lat/lon
+df = df.dropna(subset=["latitude", "longitude"])
+
+# build map
+sf_map = folium.Map(location=[37.7749, -122.4194], zoom_start=12)
+marker_cluster = MarkerCluster().add_to(sf_map)
+
+# sample
+df_sample = df.sample(n=5000, random_state=42)
+
+# add mark
+for _, row in df_sample.iterrows():
+    folium.CircleMarker(
+        location=[row["latitude"], row["longitude"]],
+        radius=3,
+        color="green",
+        fill=True,
+        fill_opacity=0.6
+    ).add_to(marker_cluster)
+
+sf_map
+```
+
+
+
+```{python}
+
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+import plotly.express as px
+# Load data
+df = pd.read_csv("data/san_francisco.csv")
+
+# Convert incident_date to datetime
+df["incident_date"] = pd.to_datetime(df["incident_date"], errors="coerce")
+
+# Rebuild year, month, month_name
+df["year"] = df["incident_date"].dt.year
+df["month"] = df["incident_date"].dt.month
+df["month_name"] = df["incident_date"].dt.strftime("%b")
+
+# Drop rows missing year or month
+df = df.dropna(subset=["year", "month"])
+
+# Monthly crime totals
+monthly_total = (
+    df.groupby(["year", "month", "month_name"])
+    .size()
+    .reset_index(name="crime_count")
+)
+```
+
+
+# TOP 10 CRIME CATEGORIES IN SF
+
+```{python}
+import pandas as pd
+import matplotlib.pyplot as plt
+
+top10 = df["crime_category"].value_counts().head(10)
+display(top10)
+
+plt.figure(figsize=(8, 5))
+top10.plot(kind="bar")
+plt.title("Top 10 Crime Categories – San Francisco")
+plt.ylabel("Incidents")
+plt.xticks(rotation=45, ha="right")
+plt.tight_layout()
+plt.show()
+```
+
+## Crime Trends Over Time
+
+```{python}
+import plotly.express as px
+
+# Get sorted list of years for the dropdown
+years = sorted(df["year"].unique())
+
+# Create line chart
+fig = px.line(
+    monthly_total,
+    x="month_name",
+    y="crime_count",
+    color="year",
+    markers=True,
+    title="Monthly Crime Totals by Year",
+    template="plotly_white"
+)
+
+# Dropdown buttons
+buttons = []
+
+# Button: All Years
+buttons.append(
+    dict(
+        label="All Years",
+        method="update",
+        args=[{"visible": [True] * len(years)}]
+    )
+)
+
+# Buttons: One per year
+for i, yr in enumerate(years):
+    visibility = [False] * len(years)
+    visibility[i] = True
+    buttons.append(
+        dict(
+            label=str(yr),
+            method="update",
+            args=[{"visible": visibility}]
+        )
+    )
+
+# Add dropdown menu
+fig.update_layout(
+    updatemenus=[
+        dict(
+            buttons=buttons,
+            direction="down",
+            x=1.15,
+            y=1.0
+        )
+    ]
+)
+
+# Order months correctly on x-axis
+fig.update_xaxes(
+    categoryorder="array",
+    categoryarray=["Jan","Feb","Mar","Apr","May","Jun",
+                   "Jul","Aug","Sep","Oct","Nov","Dec"]
+)
+
+fig
+```
+
+# NEIGHBORHOOD-LEVEL ANALYSIS WITHIN SF
+## FINDING THE TOP 10 NEIGHBORHOODS BY TOTAL CRIMES
+
+```{python}
+import plotly.express as px
+import pandas as pd
+
+df = pd.read_csv("data/san_francisco.csv",low_memory=False)
+
+top_neighborhoods = df["area_name"].value_counts().head(10)
+
+fig = px.bar(
+    x=top_neighborhoods.index,
+    y=top_neighborhoods.values,
+    labels={"x": "Neighborhood", "y": "Incidents"},
+    title="Top 10 Neighborhoods by Number of Crimes – San Francisco",
+    text=top_neighborhoods.values
+)
+
+fig.update_traces(marker_color="tomato", textposition="outside")
+fig.update_layout(
+    xaxis_tickangle=35,
+    template="simple_white",
+    height=500
+)
+
+fig.show()
+```
+
+
+# NEIGHBORHOOD X CATEGORY HEATMAP
+## TYPES OF CRIMES IN SPECIFIC NEIGHBORHOODS
+```{python}
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+temp = df.dropna(subset=["area_name", "crime_category"])
+pivot = pd.crosstab(temp["area_name"], temp["crime_category"])
+
+top_neigh = pivot.sum(axis=1).sort_values(ascending=False).head(10).index
+top_cat = pivot.sum(axis=0).sort_values(ascending=False).head(10).index
+
+pivot = pivot.loc[top_neigh, top_cat]
+
+plt.figure(figsize=(10, 6))
+sns.heatmap(pivot, cmap="Reds")
+plt.title("Top Crime Categories Across Top Neighborhoods – San Francisco")
+plt.tight_layout()
+plt.show()
+```
+
+
+# CRIMES BY HOUR OF THE WEEK
+```{python}
+df["hour"].value_counts().sort_index().plot(kind="bar", figsize=(10, 5))
+plt.title("Crimes by Hour – San Francisco")
+plt.xlabel("Hour of Day")
+plt.tight_layout()
+plt.show()
+```
+
+# YEAR TO YEAR COMPARISON: TOTAL NUMBER OF CRIMES CHANGING FROM ONE YEAR TO THE NEXT
+```{python}
+import matplotlib.pyplot as plt
+
+yearly = df.groupby("year").size().reset_index(name="crime_count")
+
+plt.figure(figsize=(8, 5))
+plt.bar(yearly["year"].astype(str), yearly["crime_count"], color="teal")
+plt.title("Yearly Crime Counts – San Francisco")
+plt.xlabel("Year")
+plt.ylabel("Number of Incidents")
+plt.tight_layout()
+plt.show()
+
+```
+
+## Top ZIP Codes in San Francisco
+
+```{python}
+# Clean zip codes
+df["zip_code"] = df["zip_code"].astype(str).str.replace(".0", "", regex=False)
+
+# Count crimes per ZIP
+zip_counts = (
+    df.groupby("zip_code")
+      .size()
+      .reset_index(name="crime_count")
+      .sort_values("crime_count", ascending=False)
+)
+
+top_zip = zip_counts.head(10)
+top_zip
+```
+
+### 🔹 Horizontal Bar Chart
+
+```{python}
+import plotly.express as px
+
+fig = px.bar(
+    top_zip.sort_values("crime_count"),
+    x="crime_count",
+    y="zip_code",
+    orientation="h",
+    title="Top 10 ZIP Codes by Total Crime",
+    labels={"zip_code": "ZIP Code", "crime_count": "Crime Count"},
+    template="plotly_white"
+)
+
+fig
+```
+
+### 🔹 Treemap View
+
+```{python}
+fig = px.treemap(
+    top_zip,
+    path=["zip_code"],
+    values="crime_count",
+    title="Crime Volume by ZIP Code (Treemap)",
+    template="plotly_white"
+)
+
+fig
+```

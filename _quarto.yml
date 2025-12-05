@@ -1,0 +1,31 @@
+project:
+  type: website
+
+website:
+  title: "California Crime Dashboard"
+  navbar:
+    left:
+      - text: Overview
+        href: index.qmd
+      - text: San Diego
+        href: sd.qmd
+      - text: Los Angeles
+        href: la.qmd
+      - text: San Francisco
+        href: sf.qmd
+      - text: Forecast
+        href: forecast_all.ipynb
+      - text: LinearRegression
+        href: LinearRegression.qmd
+
+
+format:
+  html:
+    theme: zephyr
+    toc: true
+    code-fold: true
+    code-tools: false
+    code-link: false
+
+execute:
+  freeze: auto

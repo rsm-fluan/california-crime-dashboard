@@ -1,0 +1,6 @@
+# CSV is too large to upload
+data/*.csv
+data/*.parquet
+data/
+
+/.quarto/

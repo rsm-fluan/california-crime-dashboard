@@ -1,0 +1,250 @@
+---
+title: "San Diego Crime Dashboard"
+format: html
+---
+
+```{python}
+import folium
+from folium.plugins import MarkerCluster
+import pandas as pd
+
+# load dat with lat/lon
+df_sd = pd.read_csv("data/san_diego_with_latlon.csv")
+
+# build map
+sd_map = folium.Map(location=[32.7157, -117.1611], zoom_start=11)
+marker_cluster = MarkerCluster().add_to(sd_map)
+
+# sample
+df_sample = df_sd.sample(n=5000, random_state=42)
+
+# mark
+for _, row in df_sample.iterrows():
+    folium.CircleMarker(
+        location=[row["latitude"], row["longitude"]],
+        radius=3,
+        color="blue",
+        fill=True,
+        fill_opacity=0.6
+    ).add_to(marker_cluster)
+
+sd_map
+```
+
+```{python}
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+import plotly.express as px
+
+# Load data
+df = pd.read_csv("data/san_diego_with_latlon.csv")
+
+# Convert incident_date to datetime
+df["incident_date"] = pd.to_datetime(df["incident_date"], errors="coerce")
+
+# Extract year/month/month_name clearly
+df["year"] = df["incident_date"].dt.year
+df["month"] = df["incident_date"].dt.month
+df["month_name"] = df["incident_date"].dt.strftime("%b")
+
+# clean zip codes
+df["zip_code"] = df["zip_code"].astype(str).str.replace(".0", "", regex=False)
+
+# Remove missing dates
+df = df.dropna(subset=["year", "month"])
+
+# Monthly crime totals
+monthly_total = (
+    df.groupby(["year", "month", "month_name"])
+      .size()
+      .reset_index(name="crime_count")
+)
+
+# Crime Trends Over Time
+
+import plotly.express as px
+
+years = sorted(df["year"].unique())
+
+fig = px.line(
+    monthly_total,
+    x="month_name",
+    y="crime_count",
+    color="year",
+    markers=True,
+    title="Monthly Crime Totals (Select Year)",
+    template="plotly_white"
+)
+
+# Dropdown Buttons
+buttons = []
+
+# Show all years
+buttons.append(
+    dict(
+        label="All Years",
+        method="update",
+        args=[{"visible": [True] * len(years)}]
+    )
+)
+
+# Individual years
+for i, yr in enumerate(years):
+    visibility = [False] * len(years)
+    visibility[i] = True
+
+    buttons.append(
+        dict(
+            label=str(yr),
+            method="update",
+            args=[{"visible": visibility}]
+        )
+    )
+
+fig.update_layout(
+    updatemenus=[
+        dict(buttons=buttons, direction="down", x=1.15, y=1.0)
+    ]
+)
+
+fig.update_xaxes(
+    categoryorder="array",
+    categoryarray=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"]
+)
+
+fig
+```
+
+# Neighborhood Analysis
+```{python}
+import plotly.express as px
+import pandas as pd
+
+df = pd.read_csv("data/san_diego_with_latlon.csv")
+
+top_neighborhoods = df["area_name"].value_counts().head(10)
+
+fig = px.bar(
+    x=top_neighborhoods.index,
+    y=top_neighborhoods.values,
+    labels={"x": "Neighborhood", "y": "Incidents"},
+    title="Top 10 Neighborhoods by Number of Crimes – San Diego",
+    text=top_neighborhoods.values
+)
+
+fig.update_traces(marker_color="tomato", textposition="outside")
+fig.update_layout(
+    xaxis_tickangle=35,
+    template="simple_white",
+    height=500
+)
+
+fig.show()
+
+```
+
+# Crime Hotspots
+## Top ZIP Codes
+```{python}
+
+# --- ZIP must be treated as string ---
+df["zip_code"] = df["zip_code"].astype(str)
+
+zip_counts = (
+    df.groupby("zip_code")
+      .size()
+      .reset_index(name="crime_count")
+      .sort_values("crime_count", ascending=False)
+)
+
+top_zip = zip_counts.head(10)
+
+fig = px.bar(
+    top_zip.sort_values("crime_count"),
+    x="crime_count",
+    y="zip_code",
+    orientation="h",
+    title="Top 10 ZIP Codes by Total Crime",
+    template="plotly_white",
+)
+
+fig.update_layout(
+    yaxis=dict(type="category"),   # Force categorical y-axis
+)
+
+fig
+
+```
+
+## ZIP Code Treemap
+```{python}
+fig = px.treemap(
+    top_zip,
+    path=["zip_code"],
+    values="crime_count",
+    title="Top ZIP Codes by Crime Volume"
+)
+
+fig
+```
+
+# Highest ZIP Codes by Crime Type
+```{python}
+top_desc = df["crime_description"].value_counts().head(10).index
+
+zip_by_desc = (
+    df[df["crime_description"].isin(top_desc)]
+      .groupby(["crime_description", "zip_code"])
+      .size()
+      .reset_index(name="crime_count")
+)
+
+```
+
+```{python}
+import plotly.graph_objects as go
+
+descriptions = list(top_desc)
+
+fig = go.Figure()
+
+for i, desc in enumerate(descriptions):
+    subset = zip_by_desc[zip_by_desc["crime_description"] == desc]
+    subset = subset.sort_values("crime_count", ascending=True)
+
+    fig.add_trace(
+        go.Bar(
+            x=subset["crime_count"],
+            y=subset["zip_code"],
+            orientation="h",
+            name=desc,
+            visible=True if i == 0 else False
+        )
+    )
+
+buttons = []
+for i, desc in enumerate(descriptions):
+    vis = [False] * len(descriptions)
+    vis[i] = True
+
+    buttons.append(
+        dict(
+            label=desc,
+            method="update",
+            args=[{"visible": vis},
+                  {"title": f"Top ZIP Codes for: {desc}"}]
+        )
+    )
+
+fig.update_layout(
+    title=f"Top ZIP Codes for: {descriptions[0]}",
+    template="plotly_white",
+    updatemenus=[dict(buttons=buttons, x=1.2, y=1.0)],
+    xaxis_title="Crime Count",
+    yaxis_title="ZIP Code"
+)
+
+fig
+
+```
