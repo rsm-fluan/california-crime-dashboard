@@ -14,7 +14,7 @@ website:
           - text: Los Angeles
             href: la.qmd
           - text: San Francisco
-            href: sf.qm
+            href: sf.qmd
       - text: Prediction
         menu:
         - text: Forecast - Prophet
