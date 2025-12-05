@@ -2,7 +2,7 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://rsm-fluan.github.io/california-crime-dashboard/data_schema.html</loc>
-    <lastmod>2025-12-05T05:14:57.246Z</lastmod>
+    <lastmod>2025-12-05T18:49:54.264Z</lastmod>
   </url>
   <url>
     <loc>https://rsm-fluan.github.io/california-crime-dashboard/index.html</loc>
@@ -26,6 +26,6 @@
   </url>
   <url>
     <loc>https://rsm-fluan.github.io/california-crime-dashboard/forecast_prophet.html</loc>
-    <lastmod>2025-12-05T03:52:51.798Z</lastmod>
+    <lastmod>2025-12-05T18:44:11.758Z</lastmod>
   </url>
 </urlset>
