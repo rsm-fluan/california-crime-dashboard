@@ -17,46 +17,45 @@ Each row represents one reported crime incident, with consistent columns across:
 This ensures analytical consistency for trends, forecasting, and geographic comparison.
 
 
-## 📝 Unified Variable Dictionary
+### 📝 Unified Variable Dictionary
 
 
 | Column | Type | Description |
 |--------|------|-------------|
-| **incident_id** | String | Unique identifier for each crime incident. |
-| **incident_date** | Date | Calendar date of the incident (YYYY-MM-DD). |
-| **incident_time** | Time | Time of day when the incident occurred (HH:MM:SS). |
-| **year** | Integer | Year of the incident (2020–2025). |
-| **month** | Integer | Month of the incident (1–12). |
-| **day_of_week** | String | Weekday name (e.g., Monday, Tuesday). |
-| **hour** | Integer | Hour of day (0–23). |
-| **time_bin** | String | Grouped time of day (Late Night, Morning, Afternoon, Evening). |
-| **season** | String | Season of year (Winter, Spring, Summer, Fall). |
-| **crime_code** | String / Integer | Original crime code from open-data portals. |
-| **crime_description** | String | Detailed description (e.g., “BURGLARY FROM VEHICLE”). |
-| **crime_category** | String | Standardized grouping (Property Crime, Violent Crime, etc.). |
-| **area_name** | String | Neighborhood or policing division. |
-| **zip_code** | String | ZIP code of the incident location. |
-| **latitude** | Numeric | Latitude of the incident (may be rounded/masked). |
-| **longitude** | Numeric | Longitude of the incident (may be rounded/masked). |
-| **report_status** | String | Status (Open, Closed, Cleared). |
-| **victim_age** | Integer | Age of victim when available. |
-| **victim_sex** | String | Gender of victim (M, F, X, Unknown). |
-| **victim_descent** | String | Victim race/ethnicity code from agency. |
+| **`incident_id`** | String | Unique identifier for each crime incident. |
+| **`incident_date`** | Date | Calendar date of the incident (YYYY-MM-DD). |
+| **`incident_time`** | Time | Time of day when the incident occurred (HH:MM:SS). |
+| **`year`** | Integer | Year of the incident (2020–2025). |
+| **`month`** | Integer | Month of the incident (1–12). |
+| **`day_of_week`** | String | Weekday name (e.g., Monday, Tuesday). |
+| **`hour`** | Integer | Hour of day (0–23). |
+| **`time_bin`** | String | Grouped time of day (Late Night, Morning, Afternoon, Evening). |
+| **`season`** | String | Season of year (Winter, Spring, Summer, Fall). |
+| **`crime_code`** | String / Integer | Original crime code from open-data portals. |
+| **`crime_description`** | String | Detailed description (e.g., “BURGLARY FROM VEHICLE”). |
+| **`crime_category`** | String | Standardized grouping (Property Crime, Violent Crime, etc.). |
+| **`area_name`** | String | Neighborhood or policing division. |
+| **`zip_code`** | String | ZIP code of the incident location. |
+| **`latitude`** | Numeric | Latitude of the incident (may be rounded/masked). |
+| **`longitude`** | Numeric | Longitude of the incident (may be rounded/masked). |
+| **`report_status`** | String | Status (Open, Closed, Cleared). |
+| **`victim_age`** | Integer | Age of victim when available. |
+| **`victim_sex`** | String | Gender of victim (M, F, X, Unknown). |
+| **`victim_descent`** | String | Victim race/ethnicity code from agency. |
 
 
 
 ## 🔍 Notes on Data Cleaning
 
-### **1. Geographic Filters**
+#### **1. Geographic Filters**
 Rows are removed if coordinates are:
 
 - Missing
 - Invalid (0,0)
 - Outside realistic California bounds (lat 32–38, lon –125 to –114)
 
----
 
-### **2. Time Features**
+#### **2. Time Features**
 Generated from timestamps:
 
 - `year`, `month`, `hour`
@@ -64,9 +63,8 @@ Generated from timestamps:
 - `day_of_week`
 - `season`
 
----
 
-### **3. Crime Category Standardization**
+#### **3. Crime Category Standardization**
 Crime codes from each city are mapped into unified categories such as:
 
 - Property Crime
@@ -77,18 +75,12 @@ Crime codes from each city are mapped into unified categories such as:
 - Fraud
 - Other Offenses
 
----
-
-### **4. Victim Information**
+#### **4. Victim Information**
 When available:
 
 - Victim age
 - Victim sex
 - Victim descent
-
-(Some agencies partially redact these fields.)
-
----
 
 ## 📦 Data Sources
 
@@ -105,7 +97,6 @@ All sources were cleaned and standardized into a unified schema for analysis.
 - **San Francisco Open Data Portal**
   🔗 https://data.sfgov.org/
 
----
 
 ## 📁 File Structure
 
@@ -116,7 +107,6 @@ san_diego_with_latlon.csv
 los_angeles.csv
 san_francisco.csv
 ```
----
 
 ## ✅ Ready for Use
 

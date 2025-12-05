@@ -1,39 +1,40 @@
 ---
-title: "Crime Forecasts with Prophet"
+title: " Crime Forecasts with Prophet"
 format:
   html:
     toc: true
     theme: zephyr
 ---
 
-## **Introduction**
+### 📘 Introduction
+
+This page presents crime forecasting results for **Los Angeles**, **San Diego**, and **San Francisco** using the **Prophet time-series model**.
+Forecasts are generated from pre-computed Prophet outputs (CSV files), allowing us to visualize trends quickly without retraining the model.
+
+The following visualizations include:
+
+- **30-day forecast comparison** across the three cities
+- **Actual vs. predicted crime counts**
+- **Forecast confidence intervals**
+- **Seasonal components** (weekly, yearly, and daily)
+
+Before examining the forecast results, we first review the **historical daily crime trends**, which provide essential context for understanding the model’s predictions.
 
 
 
-This page presents crime forecasting results for **Los Angeles, San Diego, and San Francisco** using the **Prophet time-series model**.
+### 🔹 Section 1 — Daily Crime Baseline (Before Forecasting)
 
-Forecasts are generated from pre-computed Prophet output (CSV files), allowing us to visualize trends without retraining the model.
+![Daily Crime Baseline](assets/baseline_daily_counts.png)
 
-
-
-The charts include:
-
+This chart shows the historical daily crime counts for Los Angeles, San Diego, and San Francisco.
+These baseline trends reveal long-term patterns, short-term fluctuations, and seasonality—all of which inform the Prophet model’s forecasts.
 
 
-* 30-day forecast comparison across the three cities
-
-* Actual vs. predicted crime counts
-
-* Forecast confidence intervals
-
-* Seasonal components (yearly, weekly, daily)
-
-
-
-These visualizations provide a quick overview of how crime patterns evolve over time and how Prophet captures long-term trends and seasonality.
-
+### 🔹 Section 2 — Prophet Modeling: Data Preparation
 
 ```{python}
+print("Before fitting the forecasting models,\nwe convert the daily crime data into the ds–y format required by Prophet.")
+
 # ============================================================
 # Build correct DAILY crime counts for LA, SD, SF
 # ============================================================
@@ -98,107 +99,60 @@ daily_sf = (
 
 ```
 
-# Daily Crime Comparison — LA vs SD vs SF
+
+### 🔹 Section 3 — Model Training
 
 ```{python}
-# ============================================================
-# Daily Crime Comparison — LA vs SD vs SF
-# ============================================================
-import matplotlib.pyplot as plt
-
-plt.figure(figsize=(18, 7))
-plt.plot(daily_la["ds"], daily_la["y"], label="Los Angeles", linewidth=2, alpha=0.9)
-plt.plot(daily_sd["ds"], daily_sd["y"], label="San Diego", linewidth=2, alpha=0.9)
-plt.plot(daily_sf["ds"], daily_sf["y"], label="San Francisco", linewidth=2, alpha=0.9)
-
-plt.title("Daily Crime Counts Comparison — LA vs SD vs SF", fontsize=20)
-plt.xlabel("Date")
-plt.ylabel("Crime Count")
-plt.legend(fontsize=12)
-plt.tight_layout()
-plt.show()
-
-```
-
-## Forecast — Los Angeles Crime (Prophet)
-
-```{python}
-# ============================================================
-# Forecast — Los Angeles Crime (Prophet)
-# ============================================================
+# ===========================================
+# Prophet Model Training (All Cities)
+# ===========================================
 
 from prophet import Prophet
 
-# Prophet requires ds as datetime, convert if needed
-daily_la["ds"] = pd.to_datetime(daily_la["ds"])
+# Same parameters for consistency
+def train_prophet_model(df):
+    model = Prophet(
+        daily_seasonality=True,
+        weekly_seasonality=True,
+        yearly_seasonality=True,
+        interval_width=0.90
+    )
+    model.fit(df)
+    return model
 
-m_la = Prophet(
-    daily_seasonality=True,
-    weekly_seasonality=True,
-    yearly_seasonality=True,
-    interval_width=0.9,
+m_la = train_prophet_model(daily_la)
+m_sd = train_prophet_model(daily_sd)
+m_sf = train_prophet_model(daily_sf)
+print("✓ Prophet models trained successfully.")
+```
 
-)
-m_la.fit(daily_la)
+### 🔹 Section 4 — Forecast Results
+```{python}
+# ============================================================
+# Forecast Results —  Los Angeles
+# ============================================================
+print("----- Los Angeles Forecast Result------")
 future_la = m_la.make_future_dataframe(periods=30)
 forecast_la = m_la.predict(future_la)
-forecast_la[["ds", "yhat", "yhat_lower", "yhat_upper"]].tail()
+display(forecast_la[["ds", "yhat", "yhat_lower", "yhat_upper"]].tail())
 
-```
-
-## Forecast — San Francisco Crime (Prophet)
-
-```{python}
 # ============================================================
-# Forecast — San Francisco Crime (Prophet)
+# Forecast Results —  San Francisco
 # ============================================================
-from prophet import Prophet
-
-# Ensure datetime format
-daily_sf["ds"] = pd.to_datetime(daily_sf["ds"])
-
-m_sf = Prophet(
-    daily_seasonality=True,
-    weekly_seasonality=True,
-    yearly_seasonality=True,
-    interval_width=0.9,
-)
-
-
-m_sf.fit(daily_sf)
+print("----- San Francisco Forecast Result------")
 future_sf = m_sf.make_future_dataframe(periods=30)
 forecast_sf = m_sf.predict(future_sf)
-forecast_sf[["ds", "yhat", "yhat_lower", "yhat_upper"]].tail()
+display(forecast_sf[["ds", "yhat", "yhat_lower", "yhat_upper"]].tail())
 
-```
-
-## Forecast — San Diego Crime (Prophet, Normal Mode)
-
-```{python}
 # ============================================================
-# Forecast — San Diego Crime (Prophet, Normal Mode)
+# Forecast Results — San Diego
 # ============================================================
-
-from prophet import Prophet
-# Ensure datetime format
-
-daily_sd["ds"] = pd.to_datetime(daily_sd["ds"])
-
-m_sd = Prophet(
-    daily_seasonality=True,
-    weekly_seasonality=True,
-    yearly_seasonality=True,
-    interval_width=0.9,
-)
-m_sd.fit(daily_sd)
-
+print("----- San Diego Forecast Result------")
 future_sd = m_sd.make_future_dataframe(periods=30)
 forecast_sd = m_sd.predict(future_sd)
-forecast_sd[["ds", "yhat", "yhat_lower", "yhat_upper"]].tail()
-
+display(forecast_sd[["ds", "yhat", "yhat_lower", "yhat_upper"]].tail())
 ```
 
-## Save Forecast Results as CSV for All 3 Cities
 
 ```{python}
 # ============================================================
@@ -218,11 +172,13 @@ forecast_sd_out.to_csv("data/san_diego_forecast.csv", index=False)
 # SF
 forecast_sf_out = forecast_sf[cols]
 forecast_sf_out.to_csv("data/san_francisco_forecast.csv", index=False)
-forecast_la_out.tail()
+# forecast_la_out.tail() # don't show on website
 
 ```
 
-# Forecast Comparison — LA vs SD vs SF
+### 🔹 Section 5 — Forecast Visualization & Comparison
+
+### 1️⃣ 30-Day Crime Forecast Comparison
 
 ```{python}
 # ============================================================
@@ -244,7 +200,17 @@ plt.show()
 
 ```
 
-# Actual vs Forecast — Los Angeles / San Diego / San Francisco
+The 30-day crime forecast illustrates clear differences in projected crime levels across the three cities.
+
+- Los Angeles begins with the highest predicted daily crime counts but shows a sharp downward decline approaching 2025.
+
+- San Diego remains relatively stable with moderate oscillation around its long-term mean.
+
+- San Francisco shows lower overall counts and smoother seasonal patterns, maintaining consistent levels over time.
+
+The visible weekly seasonality bands (tight oscillations) reflect Prophet’s detection of short-term recurring patterns across all cities.
+
+### 2️⃣ Actual vs Forecast CrimeCount
 
 ```{python}
 # ============================================================
@@ -292,7 +258,7 @@ plot_actual_vs_forecast(daily_sd, forecast_sd, "San Diego")
 plot_actual_vs_forecast(daily_sf, forecast_sf, "San Francisco")
 ```
 
-# Forecast with Confidence Interval (yhat_lower, yhat_upper)
+### 3️⃣ Forecast with Confidence Interval (yhat_lower, yhat_upper)
 
 ```{python}
 # ============================================================
@@ -336,7 +302,7 @@ plot_forecast_interval(forecast_sf, "San Francisco")
 
 ```
 
-# Prophet Seasonal Components (Trend / Weekly / Yearly)
+### 4️⃣ Prophet Seasonal Components (Trend / Weekly / Yearly)
 
 ```{python}
 # ============================================================
@@ -349,21 +315,21 @@ def plot_prophet_components(model, city_name):
 
 ```
 
-## Los Angeles
+#### Los Angeles
 
 ```{python}
 # LA
 plot_prophet_components(m_la, "Los Angeles")
 ```
 
-## San Diego
+#### San Diego
 
 ```{python}
 # SD
 plot_prophet_components(m_sd, "San Diego")
 ```
 
-## San Francisco
+#### San Francisco
 
 ```{python}
 # SF
