@@ -107,16 +107,3 @@ Crime data sourced from official city open data portals:
 This project was developed as part of **MGTA 452 - Data Analytics** at Rady School of Management, UC San Diego.
 
 **Objective:** Demonstrate advanced data visualization, statistical modeling, and interactive dashboard development using real-world crime data.
-
----
-## Author
-- GitHub: [@rsm-fluan](https://github.com/rsm-fluan)
-- Project Link: [California Crime Dashboard](https://rsm-fluan.github.io/california-crime-dashboard/)
-
----
-
-## 🙏 Acknowledgments
-
-- City open data portals for providing public crime data
-- Quarto and Plotly communities for excellent documentation
-- MGTA 452 course staff for guidance and support
