@@ -161,164 +161,395 @@ Each row represents a single reported incident.
 </table>
 
 
-## Crime Hotspot Overview
-
+## Geographic Distribution of Crime Incidents
 ```{python}
-import warnings
-warnings.filterwarnings("ignore")
 import pandas as pd
-import plotly.express as px
+import plotly.graph_objects as go
 
-# Load datasets
+# ============================
+# Load data
+# ============================
+dataframes = []
+
 df_sd = pd.read_csv("data/san_diego_with_latlon.csv")
+df_sd["city"] = "San Diego"
+dataframes.append(df_sd)
+
 df_la = pd.read_csv("data/los_angeles.csv")
+df_la["city"] = "Los Angeles"
+dataframes.append(df_la)
+
+
 df_sf = pd.read_csv("data/san_francisco.csv")
+df_sf["city"] = "San Francisco"
+dataframes.append(df_sf)
 
-# Function to prepare data for mapbox
-def prepare_data(df, city_name, sample_n=3000):
-    df = df.copy()
-    df = df.dropna(subset=["latitude", "longitude"])
-    if len(df) > sample_n:
-        df = df.sample(sample_n, random_state=42)
-    df["city"] = city_name
-    return df
 
-sd = prepare_data(df_sd, "San Diego")
-la = prepare_data(df_la, "Los Angeles")
-sf = prepare_data(df_sf, "San Francisco")
+df = pd.concat(dataframes, ignore_index=True)
 
-# Combine three cities
-df_all = pd.concat([sd, la, sf], ignore_index=True)
+# ============================
+# Clean and aggregate by area
+# ============================
+df_map = df[df['latitude'].notna() & df['longitude'].notna()].copy()
+df_map = df_map[
+    (df_map['latitude'] != 0) &
+    (df_map['longitude'] != 0) &
+    (df_map['latitude'].between(32, 38)) &
+    (df_map['longitude'].between(-125, -114))
+]
 
-# Mapbox scatter plot
-fig = px.scatter_mapbox(
-    df_all,
-    lat="latitude",
-    lon="longitude",
-    color="city",
-    zoom=4.5,
-    height=650,
-    opacity=0.4,
-    hover_data=["crime_description", "zip_code"],
-    title="Crime Hotspot Overview — San Diego, Los Angeles, San Francisco"
+
+# Aggregate by rounding coordinates to create grid cells
+# This dramatically reduces the number of points
+df_map['lat_rounded'] = (df_map['latitude'] / 0.01).round() * 0.01
+df_map['lon_rounded'] = (df_map['longitude'] / 0.01).round() * 0.01
+
+# Count crimes per grid cell
+grid_counts = (
+    df_map.groupby(['city', 'lat_rounded', 'lon_rounded'])
+    .size()
+    .reset_index(name='crime_count')
 )
+
+cities = grid_counts['city'].unique().tolist()
+colors = {
+    "San Diego": "#2E86AB",
+    "Los Angeles": "#A23B72",
+    "San Francisco": "#F18F01"
+}
+
+# ============================
+# Create figure with scatter map
+# ============================
+fig = go.Figure()
+
+for city in cities:
+    city_data = grid_counts[grid_counts['city'] == city]
+
+    # Define colorscale based on city
+    if city == "San Diego":
+        colorscale = [[0, 'rgba(46,134,171,0.2)'], [0.5, 'rgba(46,134,171,0.6)'], [1, 'rgba(46,134,171,1)']]
+    elif city == "Los Angeles":
+        colorscale = [[0, 'rgba(162,59,114,0.2)'], [0.5, 'rgba(162,59,114,0.6)'], [1, 'rgba(162,59,114,1)']]
+    else:  # San Francisco
+        colorscale = [[0, 'rgba(241,143,1,0.2)'], [0.5, 'rgba(241,143,1,0.6)'], [1, 'rgba(241,143,1,1)']]
+
+    fig.add_trace(go.Scattermapbox(
+        lat=city_data['lat_rounded'],
+        lon=city_data['lon_rounded'],
+        mode='markers',
+        marker=dict(
+            size=city_data['crime_count'].apply(lambda x: min(x/50, 20)),  # Scale size
+            color=city_data['crime_count'],
+            colorscale=colorscale,
+            showscale=True,
+            colorbar=dict(
+                title="Crimes",
+                x=1.02
+            ),
+            sizemode='diameter'
+        ),
+        name=city,
+        visible=(city == cities[0]),
+        hovertemplate=(
+            f"<b>{city}</b><br>" +
+            "Location: (%{lat:.3f}, %{lon:.3f})<br>" +
+            "Crimes: %{marker.color:,.0f}<extra></extra>"
+        )
+    ))
+
+# Calculate city centers
+city_centers = {}
+for city in cities:
+    city_data = df_map[df_map['city'] == city]
+    city_centers[city] = {
+        'lat': city_data['latitude'].median(),
+        'lon': city_data['longitude'].median(),
+        'total': len(city_data)
+    }
+
+# ============================
+# Dropdown menu
+# ============================
+buttons = []
+for i, city in enumerate(cities):
+    vis = [False] * len(cities)
+    vis[i] = True
+
+    center = city_centers[city]
+
+    buttons.append(
+        dict(
+            label=f"{city}",
+            method="update",
+            args=[
+                {"visible": vis},
+                {
+                    "mapbox.center": {"lat": center['lat'], "lon": center['lon']},
+                    "mapbox.zoom": 10,
+                    "title": {
+                        "text": f"<b>Regional Crime Heat Map — {city}</b><br><sub>{center['total']:,} incidents across {len(grid_counts[grid_counts['city'] == city]):,} areas</sub>"
+                    }
+                }
+            ]
+        )
+    )
+
+# ============================
+# Layout
+# ============================
+first_city = cities[0]
+first_center = city_centers[first_city]
 
 fig.update_layout(
-    mapbox_style="carto-positron",  # Free, no API key needed
-    margin={"r":0,"t":50,"l":0,"b":0},
-    legend_title_text="City"
+    updatemenus=[
+        dict(
+            buttons=buttons,
+            direction="down",
+            pad={"r": 10, "t": 10},
+            showactive=True,
+            x=0.02,
+            xanchor="left",
+            y=0.98,
+            yanchor="top",
+            bgcolor="rgba(255, 255, 255, 0.95)",
+            bordercolor="#CCCCCC",
+            borderwidth=1,
+            font=dict(size=12)
+        )
+    ],
+    title={
+        "text": f"<b>Regional Crime Heat Map — {first_city}</b><br><sub>{first_center['total']:,} incidents across {len(grid_counts[grid_counts['city'] == first_city]):,} areas</sub>",
+        "x": 0.5,
+        "xanchor": "center",
+        "font": {"size": 20}
+    },
+    mapbox=dict(
+        style="carto-positron",
+        center={"lat": first_center['lat'], "lon": first_center['lon']},
+        zoom=10
+    ),
+    margin=dict(t=100, b=20, l=20, r=20),
+    height=700,
+    font=dict(family="Arial, sans-serif", size=12),
+    showlegend=False
 )
 
-fig
+fig.show()
 ```
 
 
-## California Crime Overview Dashboard
-
+## Monthly Crime Trends — California Cities
 ```{python}
 import pandas as pd
-import plotly.express as px
 import plotly.graph_objects as go
 
-# load data
+# ============================
+# Load data
+# ============================
 df_sd = pd.read_csv("data/san_diego.csv")
 df_la = pd.read_csv("data/los_angeles.csv")
 df_sf = pd.read_csv("data/san_francisco.csv")
 
-# date clean
+# ============================
+# Date cleaning with multiple format support
+# ============================
 def clean_city(df, city_name):
     df = df.copy()
+    df["city"] = city_name
+
+    # Store original dates
+    df["incident_date_original"] = df["incident_date"].copy()
+
+    # Try default parsing first
     df["incident_date"] = pd.to_datetime(df["incident_date"], errors="coerce")
+
+    # For rows that failed, try alternative formats
+    if df["incident_date"].isna().any():
+        mask = df["incident_date"].isna()
+        print(f"  {city_name}: Trying alternative date formats for {mask.sum():,} rows...")
+
+        for date_format in ["%Y-%m-%d", "%m/%d/%Y %I:%M:%S %p", "%Y-%m-%d %H:%M:%S", "%m/%d/%Y"]:
+            if mask.sum() > 0:
+                try:
+                    df.loc[mask, "incident_date"] = pd.to_datetime(
+                        df.loc[mask, "incident_date_original"],
+                        format=date_format,
+                        errors="coerce"
+                    )
+                    mask = df["incident_date"].isna()
+                except:
+                    pass
+
+    # Extract date components
     df["year"] = df["incident_date"].dt.year
     df["month"] = df["incident_date"].dt.month
     df["month_name"] = df["incident_date"].dt.strftime("%b")
-    df["city"] = city_name
+
+    valid_dates = df["incident_date"].notna().sum()
+    print(f"  {city_name}: {valid_dates:,} valid dates ({valid_dates/len(df)*100:.1f}%)")
+
+    # Drop temporary column
+    df.drop("incident_date_original", axis=1, inplace=True)
+
     return df
 
 df_sd = clean_city(df_sd, "San Diego")
 df_la = clean_city(df_la, "Los Angeles")
 df_sf = clean_city(df_sf, "San Francisco")
 
-# merge
+# ============================
+# Merge and aggregate
+# ============================
 df_all = pd.concat([df_sd, df_la, df_sf], ignore_index=True)
 
-# monthly crime counts
+# Remove rows with invalid dates
+df_all = df_all[df_all["year"].notna()].copy()
+
+print(f"\nTotal valid records: {len(df_all):,}")
+
+# Monthly crime counts
 monthly_all = (
     df_all.groupby(["city", "year", "month", "month_name"])
           .size()
           .reset_index(name="crime_count")
 )
 
-# month order
+# Month order
 month_order = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"]
+monthly_all["month_name"] = pd.Categorical(monthly_all["month_name"], categories=month_order, ordered=True)
+monthly_all = monthly_all.sort_values(["year", "month"])
 
-# default year
-years = sorted(monthly_all["year"].unique())
-target_years = [yr for yr in years if 2021 <= yr <= 2024]
+# Available years
+years = sorted(monthly_all["year"].dropna().unique())
+target_years = [int(yr) for yr in years if 2021 <= yr <= 2025]
+
+if not target_years:
+    raise ValueError("No valid years found in the data!")
+
 default_year = target_years[0]
 
-df_year = monthly_all[monthly_all["year"] == default_year]
+# ============================
+# Build figure
+# ============================
+cities = ["San Diego", "Los Angeles", "San Francisco"]
+colors = {"San Diego": "#2E86AB", "Los Angeles": "#A23B72", "San Francisco": "#F18F01"}
 
-# build base figure
-fig = px.line(
-    df_year,
-    x="month_name",
-    y="crime_count",
-    color="city",
-    markers=True,
-    title=f"Monthly Crime Comparison ({default_year})",
-    template="plotly_white"
-)
+fig = go.Figure()
 
-# dropdown: one button for each year
+# Create traces for each city
+for city in cities:
+    df_city_year = monthly_all[(monthly_all["city"] == city) & (monthly_all["year"] == default_year)]
+
+    fig.add_trace(go.Scatter(
+        x=df_city_year["month_name"],
+        y=df_city_year["crime_count"],
+        mode='lines+markers',
+        name=city,
+        line=dict(color=colors[city], width=3),
+        marker=dict(size=8),
+        hovertemplate="<b>%{fullData.name}</b><br>%{x}<br>Crimes: %{y:,}<extra></extra>"
+    ))
+
+# ============================
+# Create dropdown for years
+# ============================
 year_buttons = []
 for yr in target_years:
-    df_temp = monthly_all[monthly_all["year"] == yr]
+    button_data = {"x": [], "y": []}
+
+    for city in cities:
+        df_city_year = monthly_all[(monthly_all["city"] == city) & (monthly_all["year"] == yr)]
+        button_data["x"].append(df_city_year["month_name"].tolist())
+        button_data["y"].append(df_city_year["crime_count"].tolist())
+
+    # Calculate totals for subtitle
+    year_totals = monthly_all[monthly_all["year"] == yr].groupby("city")["crime_count"].sum()
+    subtitle = " | ".join([f"{city}: {year_totals.get(city, 0):,.0f}" for city in cities])
 
     year_buttons.append(
         dict(
             label=str(yr),
             method="update",
             args=[
+                button_data,
                 {
-                    "x": [
-                        df_temp[df_temp["city"] == "San Diego"]["month_name"],
-                        df_temp[df_temp["city"] == "Los Angeles"]["month_name"],
-                        df_temp[df_temp["city"] == "San Francisco"]["month_name"],
-                    ],
-                    "y": [
-                        df_temp[df_temp["city"] == "San Diego"]["crime_count"],
-                        df_temp[df_temp["city"] == "Los Angeles"]["crime_count"],
-                        df_temp[df_temp["city"] == "San Francisco"]["crime_count"],
-                    ],
-                },
-                {
-                    "title": f"Monthly Crime Comparison ({yr})"
+                    "title": {
+                        "text": f"<b>Monthly Crime Comparison ({yr})</b><br><sub>{subtitle}</sub>",
+                        "x": 0.5,
+                        "xanchor": "center"
+                    }
                 }
             ]
         )
     )
 
-# layout
+# ============================
+# Layout
+# ============================
+default_totals = monthly_all[monthly_all["year"] == default_year].groupby("city")["crime_count"].sum()
+default_subtitle = " | ".join([f"{city}: {default_totals.get(city, 0):,.0f}" for city in cities])
+
 fig.update_layout(
     updatemenus=[
         dict(
             buttons=year_buttons,
             direction="down",
-            x=1.15,
-            y=1.05,
-            showactive=True
+            pad={"r": 10, "t": 10},
+            showactive=True,
+            x=1.02,
+            xanchor="left",
+            y=1.15,
+            yanchor="top",
+            bgcolor="rgba(255, 255, 255, 0.95)",
+            bordercolor="#CCCCCC",
+            borderwidth=1,
+            font=dict(size=12)
         )
-    ]
+    ],
+    title={
+        "text": f"<b>Monthly Crime Comparison ({default_year})</b><br><sub>{default_subtitle}</sub>",
+        "x": 0.5,
+        "xanchor": "center",
+        "font": {"size": 20}
+    },
+    xaxis_title="<b>Month</b>",
+    yaxis_title="<b>Number of Crimes</b>",
+    template="plotly_white",
+    hovermode="x unified",
+    plot_bgcolor="rgba(240, 240, 240, 0.3)",
+    font=dict(family="Arial, sans-serif", size=12),
+    legend=dict(
+        orientation="v",
+        yanchor="top",
+        y=0.98,
+        xanchor="left",
+        x=0.02,
+        bgcolor="rgba(255, 255, 255, 0.8)",
+        bordercolor="#CCCCCC",
+        borderwidth=1
+    ),
+    margin=dict(t=120, b=80, l=80, r=150),
+    height=550
 )
 
+# Update x-axis
 fig.update_xaxes(
     categoryorder="array",
     categoryarray=month_order,
-    tickangle=-45
+    showgrid=True,
+    gridwidth=1,
+    gridcolor='rgba(128, 128, 128, 0.2)'
 )
 
-fig
+# Update y-axis
+fig.update_yaxes(
+    showgrid=True,
+    gridwidth=1,
+    gridcolor='rgba(128, 128, 128, 0.2)'
+)
+
+fig.show()
 ```
 
 ## Crime Comparison — Weekday
@@ -406,13 +637,10 @@ weekday_counts = weekday_counts.sort_values("weekday")
 # Remove any rows with NaN weekday (invalid dates)
 weekday_counts = weekday_counts[weekday_counts['weekday'].notna()]
 
-print(f"\nAfter filtering NaN weekdays:")
-print(f"Cities remaining: {weekday_counts['city'].unique().tolist()}")
 
 # Pivot for easier access
 pivot = weekday_counts.pivot(index="weekday", columns="city", values="count")
 
-print(f"\nPivot table columns (cities): {pivot.columns.tolist()}")
 
 # Get actual cities present in the data
 cities = pivot.columns.tolist()
@@ -782,7 +1010,7 @@ import plotly.graph_objects as go
 # ============================
 # Load datasets
 # ============================
-print("Loading data...")
+
 df_sd = pd.read_csv("data/san_diego.csv")
 df_la = pd.read_csv("data/los_angeles.csv")
 df_sf = pd.read_csv("data/san_francisco.csv")
@@ -791,9 +1019,6 @@ df_sd["city"] = "San Diego"
 df_la["city"] = "Los Angeles"
 df_sf["city"] = "San Francisco"
 
-print(f"✓ San Diego: {len(df_sd):,} crimes")
-print(f"✓ Los Angeles: {len(df_la):,} crimes")
-print(f"✓ San Francisco: {len(df_sf):,} crimes")
 
 # ============================
 # Get top 5 crimes for each city
@@ -979,179 +1204,6 @@ fig.update_layout(
 # Add grid
 fig.update_xaxes(showgrid=True, gridwidth=1, gridcolor='rgba(128, 128, 128, 0.2)')
 fig.update_yaxes(showgrid=True, gridwidth=1, gridcolor='rgba(128, 128, 128, 0.2)')
-
-fig.show()
-```
-
-
-# Regional Heat Map
-
-```{python}
-import pandas as pd
-import plotly.graph_objects as go
-
-# ============================
-# Load data
-# ============================
-dataframes = []
-
-try:
-    df_sd = pd.read_csv("data/san_diego_with_latlon.csv")
-    df_sd["city"] = "San Diego"
-    dataframes.append(df_sd)
-    print(f"✓ Loaded San Diego: {len(df_sd)} rows")
-except Exception as e:
-    print(f"✗ Could not load San Diego: {e}")
-
-try:
-    df_la = pd.read_csv("data/los_angeles.csv")
-    df_la["city"] = "Los Angeles"
-    dataframes.append(df_la)
-    print(f"✓ Loaded Los Angeles: {len(df_la)} rows")
-except Exception as e:
-    print(f"✗ Could not load Los Angeles: {e}")
-
-try:
-    df_sf = pd.read_csv("data/san_francisco.csv")
-    df_sf["city"] = "San Francisco"
-    dataframes.append(df_sf)
-    print(f"✓ Loaded San Francisco: {len(df_sf)} rows")
-except Exception as e:
-    print(f"✗ Could not load San Francisco: {e}")
-
-if not dataframes:
-    raise ValueError("No data files could be loaded!")
-
-df = pd.concat(dataframes, ignore_index=True)
-print(f"\nTotal combined rows: {len(df)}")
-
-# ============================
-# Clean location data
-# ============================
-# Remove rows with missing coordinates
-df_map = df[df['latitude'].notna() & df['longitude'].notna()].copy()
-
-# Remove invalid coordinates (0,0 or extreme outliers)
-df_map = df_map[
-    (df_map['latitude'] != 0) &
-    (df_map['longitude'] != 0) &
-    (df_map['latitude'].between(32, 38)) &  # California latitude range
-    (df_map['longitude'].between(-125, -114))  # California longitude range
-]
-
-print(f"Valid coordinates: {len(df_map)} rows ({len(df_map)/len(df)*100:.1f}%)")
-
-cities = df_map['city'].unique().tolist()
-colors = ["#2E86AB", "#A23B72", "#F18F01"]
-
-print(f"\nCrime counts by city:")
-for city in cities:
-    city_count = len(df_map[df_map['city'] == city])
-    print(f"  {city}: {city_count:,} incidents with valid coordinates")
-
-# ============================
-# Create map figure
-# ============================
-fig = go.Figure()
-
-# Add density heatmap for each city
-for i, city in enumerate(cities):
-    city_data = df_map[df_map['city'] == city]
-
-    # Define color scales for each city
-    color_scales = [
-        [[0, 'rgba(0,0,0,0)'], [0.3, 'rgba(46,134,171,0.25)'], [0.6, 'rgba(46,134,171,0.5)'], [1, 'rgba(46,134,171,0.8)']],  # Blue
-        [[0, 'rgba(0,0,0,0)'], [0.3, 'rgba(162,59,114,0.25)'], [0.6, 'rgba(162,59,114,0.5)'], [1, 'rgba(162,59,114,0.8)']],  # Magenta
-        [[0, 'rgba(0,0,0,0)'], [0.3, 'rgba(241,143,1,0.25)'], [0.6, 'rgba(241,143,1,0.5)'], [1, 'rgba(241,143,1,0.8)']]      # Orange
-    ]
-
-    fig.add_trace(go.Densitymapbox(
-        lat=city_data['latitude'],
-        lon=city_data['longitude'],
-        z=[1] * len(city_data),  # All points weighted equally
-        radius=8,
-        colorscale=color_scales[i % len(color_scales)],
-        showscale=False,
-        hovertemplate=f'<b>{city}</b><br>Crime Density<extra></extra>',
-        visible=(i == 0),
-        name=city
-    ))
-
-# Calculate center points for each city
-city_centers = {}
-for city in cities:
-    city_data = df_map[df_map['city'] == city]
-    city_centers[city] = {
-        'lat': city_data['latitude'].median(),
-        'lon': city_data['longitude'].median(),
-        'count': len(city_data)
-    }
-
-# ============================
-# Dropdown menu
-# ============================
-buttons = []
-for i, city in enumerate(cities):
-    vis = [False] * len(cities)
-    vis[i] = True
-
-    center = city_centers[city]
-
-    buttons.append(
-        dict(
-            label=f"{city} ({center['count']:,} incidents)",
-            method="update",
-            args=[
-                {"visible": vis},
-                {
-                    "mapbox.center": {"lat": center['lat'], "lon": center['lon']},
-                    "mapbox.zoom": 10,
-                    "title": {
-                        "text": f"<b>Crime Heat Map — {city}</b><br><sub>{center['count']:,} incidents with valid coordinates</sub>"
-                    }
-                }
-            ]
-        )
-    )
-
-# ============================
-# Layout with map styling
-# ============================
-first_city = cities[0]
-first_center = city_centers[first_city]
-
-fig.update_layout(
-    updatemenus=[
-        dict(
-            buttons=buttons,
-            direction="down",
-            pad={"r": 10, "t": 10},
-            showactive=True,
-            x=0.02,
-            xanchor="left",
-            y=0.98,
-            yanchor="top",
-            bgcolor="rgba(255, 255, 255, 0.95)",
-            bordercolor="#CCCCCC",
-            borderwidth=1,
-            font=dict(size=12)
-        )
-    ],
-    title={
-        "text": f"<b>Crime Heat Map — {first_city}</b><br><sub>{first_center['count']:,} incidents with valid coordinates</sub>",
-        "x": 0.5,
-        "xanchor": "center",
-        "font": {"size": 20}
-    },
-    mapbox=dict(
-        style="carto-positron",  # Clean base map
-        center={"lat": first_center['lat'], "lon": first_center['lon']},
-        zoom=10
-    ),
-    margin=dict(t=100, b=20, l=20, r=20),
-    height=700,
-    font=dict(family="Arial, sans-serif", size=12)
-)
 
 fig.show()
 ```
