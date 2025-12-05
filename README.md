@@ -67,19 +67,17 @@ This interactive dashboard provides comprehensive analysis of crime patterns acr
 
 ```
 california-crime-dashboard/
-├── index.qmd              # Overview page
-├── sd.qmd                 # San Diego analysis
-├── la.qmd                 # Los Angeles analysis
-├── sf.qmd                 # San Francisco analysis
-├── forecast_prophet.qmd   # Prophet forecasting
-├── linear_regression.qmd  # Linear regression models
-├── data_schema.qmd        # Data documentation
-├── _quarto.yml            # Quarto configuration
-├── data/
-│   ├── san_diego.csv
-│   ├── los_angeles.csv
-│   └── san_francisco.csv
-└── README.md
+├── index.qmd                 # Overview page
+├── sd.qmd                    # San Diego analysis
+├── la.qmd                    # Los Angeles analysis
+├── sf.qmd                    # San Francisco analysis
+├── forecast_prophet.qmd      # Forecasting models
+├── linear_regression.qmd     # Regression analysis
+├── data_schema.qmd           # Data dictionary
+├── assets/                   # Screenshots & assets
+├── _quarto.yml               # Project configuration
+└── data/                     # CSV data files
+
 ```
 
 ---
@@ -111,6 +109,7 @@ This project was developed as part of **MGTA 452 - Data Analytics** at Rady Scho
 **Objective:** Demonstrate advanced data visualization, statistical modeling, and interactive dashboard development using real-world crime data.
 
 ---
+## Author
 - GitHub: [@rsm-fluan](https://github.com/rsm-fluan)
 - Project Link: [California Crime Dashboard](https://rsm-fluan.github.io/california-crime-dashboard/)
 
@@ -121,10 +120,3 @@ This project was developed as part of **MGTA 452 - Data Analytics** at Rady Scho
 - City open data portals for providing public crime data
 - Quarto and Plotly communities for excellent documentation
 - MGTA 452 course staff for guidance and support
-
----
-
-<div align="center">
-  
-
-</div>
